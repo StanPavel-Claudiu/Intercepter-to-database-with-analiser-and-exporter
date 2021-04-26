@@ -1,0 +1,9 @@
+Instructions: 
+ 
+ 1. Navigate to the "challenge" directory, and run "docker compose up" 
+ - this will start containers containing the six docker apps (web, 
+ adminer, mysql, analiser, prometheus, and mysql_exporter)
+ 2. Run "docker run --tty --net=container:challenge_web_1 analiser"
+ - this process will start intercepting challenge_web's incoming traffic and
+ output it to the database.
+

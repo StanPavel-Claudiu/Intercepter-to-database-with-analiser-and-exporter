@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+
+    web:
+        build: .
+
+    analiser:
+        build: analiser
+        volumes:
+            - ./tcpdump.txt:/root/tcpdump.txt
+            - dump:/root/tcpdump.txt
+    dbse:
+        image: mysql
+        command: --init-file /data/application/init.sql
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        volumes: 
+            - ./init.sql:/data/application/init.sql
+            - dump:/data/application/tcpdump.txt
+        environment:
+            MYSQL_ROOT_PASSWORD: q1w2e3r4
+            MYSQL_PASSWORD: q1w2e3r4
+            MYSQL_DATABASE: logsDB
+            COPY: init.sql /docker-entrypoint-initdb.d/
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+          - 8080:8080
+
+    prometheus:
+        build: python
+        ports:
+            - "8000:8000"
+    #maker:
+        #build: exporter
+        #ports:
+          #- 9104:9104
+
+    mysqld_exporter_high_res:
+        image: prom/mysqld-exporter:latest
+        container_name: exporter
+        environment:
+          - DATA_SOURCE_NAME=root:q1w2e3r4@(logsDB:3306)/
+        ports:
+          - "9104:9104"
+        #command: ["--web.listen-address=:9104", "--collect.global_status=false", "--collect.global_variables=false", "--collect.slave_status=false", "--collect.info_schema.tables=false", "--collect.binlog_size=false", "--collect.info_schema.processlist=false", "--collect.info_schema.userstats=false", "--collect.info_schema.tables=false", "--collect.auto_increment.columns=false", "--collect.info_schema.tablestats=false", "--collect.perf_schema.file_events=false", "--collect.perf_schema.eventsstatements=false", "--collect.perf_schema.indexiowaits=false", "--collect.perf_schema.tableiowaits=false", "--collect.perf_schema.tablelocks=false", "--collect.perf_schema.eventswaits=false"]
+
+volumes:
+    dump:
+        external: true
+    sql:
+        external: true
